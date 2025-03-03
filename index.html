@@ -8,6 +8,9 @@
 
   <body id="inside-app">
     <style>
+      body {
+        margin: 0;
+      }
       .hidden {
         display: none;
       }
@@ -119,14 +122,12 @@
         return everyDay;
       }
       let sortFilterRender = (stringifiedJson) => {
-        console.log("sortFilterRender()");
+        // console.log("sortFilterRender()");
         let myJson = JSON.parse(stringifiedJson);
         numberOfArticles = parseInt(document.getElementById("days").value) <= 100 
                 ? parseInt(document.getElementById("days").value)
                 : 100;
         let tempJson = myJson.allPosts.slice(0,numberOfArticles);
-        console.log(numberOfArticles)
-        // console.log("tempJson:", tempJson);
         let resArticles = tempJson;
         // resArticles = filteredForLastHundredMondays(resArticles);
         // delete the dom
@@ -135,12 +136,7 @@
             a.removeChild(a.lastElementChild);
             a.lastElementChild = a.lastElementChild;
           }
-        // remake the dom
-
-
-
-
-        // render time
+        // re-render the dom
         articlesNode = document.getElementById("articles");
         for (let i=0; i<resArticles.length; i++) {
           article = resArticles[i];
@@ -160,7 +156,6 @@
         }
       }
       let toggleDarkStyle = () => {
-        // console.log("toggleDarkStyle()");
         if (document.getElementById("dark-input").checked) {
           newStyleNode = document.createElement("style");
             newStyleNode.setAttribute("id","dark-style");
@@ -173,14 +168,14 @@
         }
       }
       let hearHeader = (e) => {
-        console.log("hearHeader()")
+        // console.log("hearHeader()")
         // e.preventDefault();
         sortFilterRender( document.getElementById("storage").value );
       }
 
 
       let fetchAndStoreData = () => {
-          document.getElementById("loading").classList.remove("hidden");
+        document.getElementById("loading").classList.remove("hidden");
         fetch("https://whatthefuckjusthappenedtoday.com/api/v1/posts.json")
           .then((response) => {
             if (!response.ok) {
@@ -190,14 +185,13 @@
           })
           .then((myString) => {
             document.getElementById("loading").classList.add("hidden");
-            // console.log(myString)
-            // initqal render
+            // initial render
             document.getElementById("storage").value = myString;
             sortFilterRender( document.getElementById("storage").value );
             
           })
           .catch((error) => {
-            console.log("??Unexpected error??")
+            console.log("Very unexpected error:")
             console.error(error);
           });
       }
