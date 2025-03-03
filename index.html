@@ -7,6 +7,57 @@
   </head>
 
   <body id="inside-app">
+    <style>
+      .hidden {
+        display: none;
+      }
+      header {
+        box-shadow: 0 5px 5px #727272;
+        margin-bottom: 20px;
+      }
+        h1 {
+          margin:0;
+        }
+        header #description {
+          margin: 0px 0 20px;
+        }
+        header #description p {
+          color: gray;
+          font-size: 9pt;
+          margin: 0;
+        }
+        input.days {
+          box-shadow: inset 0 3px 11px #dadada;
+          width: 16px;
+        }
+      #storage {
+        font-family: "Lucida Console", Monaco, monospace; 
+        background: gray;
+        padding: 20px;
+        width: 100%;
+        display: none;
+      }
+
+      #articles {
+      }
+        article {
+          margin-bottom: 30px;
+        }
+      footer {
+        text-align: center;
+        background: gray;
+        padding: 5px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%
+      }
+      footer button {
+        border-radius: 10px;
+        margin-left: 5px;
+        padding: 5px;
+      }
+    </style>
     <script>
       let clearLocalStuff = () => {
         localStorage.clear();
