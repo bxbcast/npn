@@ -2,9 +2,196 @@
 <html lang="en">
   <head>
   	<meta charset="UTF-8"/>
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Federal News</title>
   </head>
 
-  <body>
-    <h1>h1</h1>
+  <body id="inside-app">
+    <script>
+      let clearLocalStuff = () => {
+        localStorage.clear();
+        sessionStorage.clear();
+        let cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          let cookie = cookies[i];
+          let eqPos = cookie.indexOf("=");
+          let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+          document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          }
+      }
+      clearLocalStuff();
+    </script>
+    <main>
+      <header>
+        <h1>Federal News</h1>
+        <div id="description">
+          <p>These news summaries are from <a href="https://whatthefuckjusthappenedtoday.com/">whatthefuckjusthappenedtoday.com</a>. I do not own them.</p>
+          <p>You can read about this journalist's <a href="https://github.com/mkiser/WTFJHT/blob/master/README.md">background and standards here</a>.</p>
+          <p>This page <a href="https://whatthefuckjusthappenedtoday.com/license/">pulls from</a> the <a href="https://whatthefuckjusthappenedtoday.com/api/v1/posts.json">public API</a>, showing up to 100 summaries.</p>
+          <p>You can save this page locally.</p>
+        </div>
+        <form>
+
+          <div id="days-sentence">
+            <label class="days"for="days">Showing the last </label>
+            <input class="days" id="days" type="text" name="days" autofocus="" placeholder="" value="5" onkeyup="hearHeader()"> 
+            <span class="days">available business days.</span>
+          </div>
+
+          <!-- <input class="oldest" id="oldest-input" type="checkbox" name="oldest"> -->
+          <!-- <label class="oldest" for="oldest">Sort oldest-to-newest</label> -->
+
+          <!-- <input class="mondays" id="mondays-input" type="checkbox" name="mondays"> -->
+          <!-- <label class="mondays" for="mondays">Mondays only </label> -->
+
+          <input class="dark"type="checkbox" id="dark-input" name="dark" onclick="toggleDarkStyle()">
+          <label class="dark" for="dark" >Dark mode</label>
+
+        </form>
+      </header>
+      <textarea id="storage"></textarea>
+      <section id="articles">
+        <span id="loading" class="hidden">Loading... this may take 20 seconds... </span>
+      </section>
+      <footer id="permanent-footer" onclick="hideFooter()" style="color:black;">
+        This app does not use cookies, because tracking people online is stupid! <button>Thank God</button>
+      </footer>
+    </main>
+    <script>
+      let numberOfArticles = parseInt(document.getElementById("days").value) <= 100 
+        ? parseInt(document.getElementById("days").value)
+        : 100;
+      let hideFooter = () => {
+        document.getElementById('permanent-footer').classList.add('hidden');
+      }
+      let filteredForLastHundredMondays = (everyDay) => {
+        return everyDay;
+      }
+      let sortFilterRender = (stringifiedJson) => {
+        console.log("sortFilterRender()");
+        let myJson = JSON.parse(stringifiedJson);
+        numberOfArticles = parseInt(document.getElementById("days").value) <= 100 
+                ? parseInt(document.getElementById("days").value)
+                : 100;
+        let tempJson = myJson.allPosts.slice(0,numberOfArticles);
+        console.log(numberOfArticles)
+        // console.log("tempJson:", tempJson);
+        let resArticles = tempJson;
+        // resArticles = filteredForLastHundredMondays(resArticles);
+        // delete the dom
+          let a = document.getElementById("articles");
+          while (a.lastElementChild) {
+            a.removeChild(a.lastElementChild);
+            a.lastElementChild = a.lastElementChild;
+          }
+        // remake the dom
+
+
+
+
+        // render time
+        articlesNode = document.getElementById("articles");
+        for (let i=0; i<resArticles.length; i++) {
+          article = resArticles[i];
+          newArticleNode = document.createElement("article");
+            newArticleNode.setAttribute("class","article_"+i);
+            newArticleNode.appendChild(document.createTextNode( 
+              article.todayInOneSentence
+            ));
+            newArticleNode.appendChild(document.createTextNode( 
+              article.date.date + ". "
+            ));
+            newANode = document.createElement("a");
+              newANode.setAttribute("href",article.href);
+              newANode.appendChild(document.createTextNode("Article"));
+            newArticleNode.appendChild(newANode);
+          articlesNode.appendChild(newArticleNode);
+        }
+      }
+      let toggleDarkStyle = () => {
+        // console.log("toggleDarkStyle()");
+        if (document.getElementById("dark-input").checked) {
+          newStyleNode = document.createElement("style");
+            newStyleNode.setAttribute("id","dark-style");
+            newStyleNode.innerHTML = '*{background:black} *{color:white}';
+            document.getElementById("permanent-footer").appendChild(newStyleNode)
+          // document.getElementById("dark-input").removeAttribute("checked"); 
+        } else {
+          document.getElementById("dark-style").remove() 
+          // document.getElementById("dark-input").setAttribute("checked", ""); 
+        }
+      }
+      let hearHeader = (e) => {
+        console.log("hearHeader()")
+        // e.preventDefault();
+        sortFilterRender( document.getElementById("storage").value );
+      }
+
+
+      let fetchAndStoreData = () => {
+          document.getElementById("loading").classList.remove("hidden");
+        fetch("https://whatthefuckjusthappenedtoday.com/api/v1/posts.json")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Error getting data from the API: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then((myString) => {
+            document.getElementById("loading").classList.add("hidden");
+            // console.log(myString)
+            // initqal render
+            document.getElementById("storage").value = myString;
+            sortFilterRender( document.getElementById("storage").value );
+            
+          })
+          .catch((error) => {
+            console.log("??Unexpected error??")
+            console.error(error);
+          });
+      }
+      let testAndStoreData = () => {
+        testString = `
+          {
+            "allPosts": [
+              {
+                "href": "/",
+                "todayInOneSentence": "A ",
+                "date": {
+                  "fullDate": "2025-02-27 15:04:00 -0800",
+                  "date": "2025-02-27"
+                }
+              },
+              {
+                "href": "/",
+                "todayInOneSentence": "B ",
+                "date": {
+                  "fullDate": "2025-02-26 14:30:00 -0800",
+                  "date": "2025-02-26"
+                }
+              },
+              {
+                "href": "/",
+                "todayInOneSentence": "C",
+                "date": {
+                  "fullDate": "2017-01-20 00:00:00 -0800",
+                  "date": "2017-01-20"
+                }
+              }
+            ]
+          }
+        `
+        document.getElementById("storage").value = testString;
+        sortFilterRender( document.getElementById("storage").value );
+      }
+      // testAndStoreData(); // for testing only
+      fetchAndStoreData(); // for real data only
+
+
+      clearLocalStuff();
+      // dark by default on initial render
+        document.getElementById("dark-input").setAttribute("checked", ""); 
+        toggleDarkStyle(); 
+    </script>
   </body>
 </html>
